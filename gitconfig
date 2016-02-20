@@ -1,0 +1,8 @@
+[user]
+	name = Yongjin Cho
+	email = yongjin.cho@gmail.com
+[alias]
+	st = status
+	ci = commit
+	co = checkout
+	br = branch
