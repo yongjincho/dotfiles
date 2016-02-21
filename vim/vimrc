@@ -1,6 +1,47 @@
-syntax on
-
-" Initialize Vundle.vim
+" Initialize plugins
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
+
 Plugin 'VundleVim/Vundle.vim'
+
+" bufexplorer
+Plugin 'jlanzarotta/bufexplorer'
+
+Plugin 'pangloss/vim-javascript'
+
+call vundle#end()
+
+" highlight
+syntax on
+set hlsearch
+
+" indentation
+set expandtab
+set shiftwidth=4
+set softtabstop=4
+
+set autoindent
+set smartindent
+
+" Make hidden file when it is closed
+set hidden
+
+" cscope
+if has("cscope")
+    " cscope 결과를 quickfix창에서 보기
+    "  c: find functions calling this symbol
+    "  d: find functions called by this symbol
+    "  e: find this egrep patterm
+    "  i: find files #including this file
+    "  s: find this C symbol
+    "  t: find asssignments to
+    set cscopequickfix=c-,d-,e-,i-,s-,t-
+    " cscopetag
+    set cscopetag
+    "if filereadable("cscope.out")
+    "    cs add cscope.out
+    "endif
+endif
+
+" disable LogiPat. To use ':E'.
+let g:loaded_logipat = 1
