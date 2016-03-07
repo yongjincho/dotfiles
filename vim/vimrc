@@ -3,10 +3,7 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
-
-" bufexplorer
 Plugin 'jlanzarotta/bufexplorer'
-
 Plugin 'pangloss/vim-javascript'
 
 call vundle#end()
@@ -25,6 +22,9 @@ set smartindent
 
 " Make hidden file when it is closed
 set hidden
+
+" shortcut to move to the next message in qiuckfix
+map <F3> :cn<CR>
 
 " cscope
 if has("cscope")
