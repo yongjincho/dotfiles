@@ -1,12 +1,7 @@
-" Initialize plugins
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'jlanzarotta/bufexplorer'
-Plugin 'pangloss/vim-javascript'
-
-call vundle#end()
+" Initialize plugins (vim-plug)
+call plug#begin('~/.vim/plugged')
+Plug 'jlanzarotta/bufexplorer'
+call plug#end()
 
 " highlight
 syntax on
