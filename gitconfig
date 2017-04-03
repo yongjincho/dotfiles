@@ -6,3 +6,5 @@
 	ci = commit
 	co = checkout
 	br = branch
+[color]
+	ui = auto
