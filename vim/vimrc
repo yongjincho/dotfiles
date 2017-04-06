@@ -11,9 +11,11 @@ set hlsearch
 set expandtab
 set shiftwidth=4
 set softtabstop=4
-
 set autoindent
 set smartindent
+
+" tensorflow indentation
+autocmd Filetype python setlocal expandtab tabstop=2 shiftwidth=2
 
 " Make hidden file when it is closed
 set hidden
