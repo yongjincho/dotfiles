@@ -6,6 +6,7 @@ call plug#end()
 " highlight
 syntax on
 set hlsearch
+set number
 
 " indentation
 set expandtab
@@ -15,7 +16,13 @@ set autoindent
 set smartindent
 
 " tensorflow indentation
-autocmd Filetype python setlocal expandtab tabstop=2 shiftwidth=2
+highlight ColorColumn ctermbg=lightgrey guibg=lightgrey
+autocmd BufRead,BufNewFile,BufEnter */seq2seq/*  setlocal expandtab softtabstop=2 shiftwidth=2
+autocmd BufRead,BufNewFile,BufEnter */seq2seq/*  setlocal colorcolumn=80
+autocmd BufRead,BufNewFile,BufEnter */t2t/*  setlocal expandtab softtabstop=2 shiftwidth=2
+autocmd BufRead,BufNewFile,BufEnter */t2t/*  setlocal colorcolumn=80
+"autocmd Filetype python setlocal expandtab softtabstop=2 shiftwidth=2
+"autocmd Filetype python setlocal colorcolumn=80
 
 " Make hidden file when it is closed
 set hidden
