@@ -16,11 +16,11 @@ set autoindent
 set smartindent
 
 " tensorflow indentation
-highlight ColorColumn ctermbg=lightgrey guibg=lightgrey
-autocmd BufRead,BufNewFile,BufEnter */seq2seq/*  setlocal expandtab softtabstop=2 shiftwidth=2
-autocmd BufRead,BufNewFile,BufEnter */seq2seq/*  setlocal colorcolumn=80
-autocmd BufRead,BufNewFile,BufEnter */t2t/*  setlocal expandtab softtabstop=2 shiftwidth=2
-autocmd BufRead,BufNewFile,BufEnter */t2t/*  setlocal colorcolumn=80
+"highlight ColorColumn ctermbg=lightgrey guibg=lightgrey
+"autocmd BufRead,BufNewFile,BufEnter */seq2seq/*  setlocal expandtab softtabstop=2 shiftwidth=2
+"autocmd BufRead,BufNewFile,BufEnter */seq2seq/*  setlocal colorcolumn=80
+"autocmd BufRead,BufNewFile,BufEnter */t2t/*  setlocal expandtab softtabstop=2 shiftwidth=2
+"autocmd BufRead,BufNewFile,BufEnter */t2t/*  setlocal colorcolumn=80
 "autocmd Filetype python setlocal expandtab softtabstop=2 shiftwidth=2
 "autocmd Filetype python setlocal colorcolumn=80
 autocmd Filetype javascript setlocal shiftwidth=2 tabstop=2
