@@ -23,6 +23,8 @@ autocmd BufRead,BufNewFile,BufEnter */t2t/*  setlocal expandtab softtabstop=2 sh
 autocmd BufRead,BufNewFile,BufEnter */t2t/*  setlocal colorcolumn=80
 "autocmd Filetype python setlocal expandtab softtabstop=2 shiftwidth=2
 "autocmd Filetype python setlocal colorcolumn=80
+autocmd Filetype javascript setlocal shiftwidth=2 tabstop=2
+autocmd Filetype html setlocal shiftwidth=2 tabstop=2
 
 " Make hidden file when it is closed
 set hidden
@@ -46,6 +48,8 @@ if has("cscope")
     "    cs add cscope.out
     "endif
 endif
+
+set ruler
 
 " disable LogiPat. To use ':E'.
 let g:loaded_logipat = 1
