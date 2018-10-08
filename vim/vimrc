@@ -2,10 +2,14 @@
 call plug#begin('~/.vim/plugged')
 Plug 'jlanzarotta/bufexplorer'
 Plug 'scrooloose/nerdtree'
+Plug 'vim-airline/vim-airline'
 call plug#end()
 
 " NERDTree
 map <Leader>nt <ESC>:NERDTree<CR>
+
+" airline
+let g:airline_powerline_fonts=1
 
 " highlight
 syntax on
