@@ -1,7 +1,11 @@
 " Initialize plugins (vim-plug)
 call plug#begin('~/.vim/plugged')
 Plug 'jlanzarotta/bufexplorer'
+Plug 'scrooloose/nerdtree'
 call plug#end()
+
+" NERDTree
+map <Leader>nt <ESC>:NERDTree<CR>
 
 " highlight
 syntax on
