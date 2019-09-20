@@ -1,7 +1,8 @@
+set encoding=utf-8
+
 " Initialize plugins (vim-plug)
 call plug#begin('~/.vim/plugged')
 Plug 'jlanzarotta/bufexplorer'
-Plug 'scrooloose/nerdtree'
 Plug 'vim-airline/vim-airline'
 call plug#end()
 
