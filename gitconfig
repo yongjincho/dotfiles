@@ -8,5 +8,3 @@
 	br = branch
 [color]
 	ui = auto
-[core]
-	editor = /usr/local/bin/vim
