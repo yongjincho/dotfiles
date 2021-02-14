@@ -8,3 +8,9 @@
 	br = branch
 [color]
 	ui = auto
+[pull]
+	ff = only
+[init]
+	defaultBranch = master
+[core]
+	excludesFile = ~/.gitignore
