@@ -7,6 +7,8 @@ set hidden
 syntax on
 set hlsearch
 
+set directory=$HOME/.vim/swapfiles//
+
 " plugins (vim-plug)
 call plug#begin('~/.vim/plugged')
 Plug 'jlanzarotta/bufexplorer'
@@ -15,6 +17,7 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'ycm-core/YouCompleteMe'
 Plug 'tpope/vim-fugitive'
 Plug 'othree/html5.vim'
+Plug 'nvie/vim-flake8'
 call plug#end()
 
 " airline
