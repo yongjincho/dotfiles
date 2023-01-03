@@ -11,6 +11,8 @@
 [pull]
 	ff = only
 [pager]
-    branch = false
+	branch = false
 [url "ssh://git@github.com/"]
 	insteadOf = https://github.com/
+[init]
+	defaultBranch = main
