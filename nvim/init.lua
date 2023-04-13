@@ -37,27 +37,14 @@ require('packer').startup(function(use)
   use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable 'make' == 1 }
 
   -- LSP
-  use { -- LSP Configuration & Plugins
-    'neovim/nvim-lspconfig',
-    requires = {
-      -- Automatically install LSPs to stdpath for neovim
-      'williamboman/mason.nvim',
-      'williamboman/mason-lspconfig.nvim',
-
-      -- Useful status updates for LSP
-      'j-hui/fidget.nvim',
-    },
-  }
+  use 'neovim/nvim-lspconfig'
+  use 'j-hui/fidget.nvim' -- Useful status updates for LSP
 
   -- Autocompletion
-  use {
-    'hrsh7th/nvim-cmp', -- Autocompletion plugin
-    requires = {
-      'hrsh7th/cmp-nvim-lsp',
-      'L3MON4D3/LuaSnip', -- Snippets plugin
-      'saadparwaiz1/cmp_luasnip',
-    },
-  }
+  use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
+  use 'hrsh7th/cmp-nvim-lsp'
+  use 'L3MON4D3/LuaSnip' -- Snippets plugin
+  use 'saadparwaiz1/cmp_luasnip'
 
   -- Additional lua configuration, makes nvim stuff amazing
   use 'folke/neodev.nvim'
@@ -72,12 +59,30 @@ if packer_bootstrap then
 end
 
 
+-- Load old vim plugins
+local ensure_plug = function()
+  local fn = vim.fn
+  local install_path = fn.stdpath('data') .. '/site/autoload/plug.vim'
+  if fn.empty(fn.glob(install_path)) > 0 then
+    fn.system{'curl', '-fLo', install_path, '--create-dirs',
+              'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'}
+  end
+end
+ensure_plug()
+
+vim.cmd[[
+call plug#begin('~/.local/share/nvim/plugged')
+Plug 'jlanzarotta/bufexplorer'
+call plug#end()
+]]
+
+
 -- General options (`:help vim.o`)
 vim.o.number = true
 vim.o.termguicolors = true
--- Use gruvbox dark theme
+-- Use gruvbox theme
 vim.cmd [[colorscheme gruvbox]]
-vim.o.bg = 'dark'
+vim.o.bg = 'light'
 -- Case insensitive search
 vim.o.ignorecase = true
 vim.o.smartcase = true
@@ -97,7 +102,7 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 require('lualine').setup {
   options = {
     icons_enabled = false,
-    theme = 'gruvbox_dark',
+    theme = 'gruvbox_light',
   },
   sections = {
     lualine_c = {
@@ -108,8 +113,8 @@ require('lualine').setup {
 
 
 -- indent_blankline
-vim.opt.list = true
-vim.opt.listchars:append "eol:↴"
+-- vim.opt.list = true
+-- vim.opt.listchars:append "eol:↴"
 require('indent_blankline').setup {
   show_end_of_line = true,
   show_trailing_blankline_indent = false,
@@ -133,6 +138,7 @@ nmap('<leader><space>', function ()
   telescope.buffers{
     sort_mru = true,
     initial_mode = 'normal',
+    ignore_current_buffer = true,
     path_display = function(_, path)
       local tail = require("telescope.utils").path_tail(path)
       if tail == path then
@@ -189,57 +195,13 @@ local on_attach = function(_, bufnr)
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function() vim.lsp.buf.format() end, { desc = 'Format current buffer with LSP' })
 end
 
--- Enable the following language servers
---  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
---
---  Add any additional override configuration in the following tables. They will be passed to
---  the `settings` field of the server config. You must look up that documentation yourself.
-local servers = {
-  gopls = {},
-  pyright = {
-    autoSearchPaths = true,
-    diagnosticMode = 'workspace',
-  },
-  tsserver = {},
-  -- clangd = {},
-  -- rust_analyzer = {},
-  sumneko_lua = {
-    Lua = {
-      workspace = { checkThirdParty = false },
-      telemetry = { enable = false },
-    },
-  },
-}
-
--- Setup neovim lua configuration
-require('neodev').setup()
-
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
--- Setup mason so it can manage external tooling
-require('mason').setup()
-
--- Ensure the servers above are installed
-local mason_lspconfig = require 'mason-lspconfig'
-
-mason_lspconfig.setup {
-  ensure_installed = vim.tbl_keys(servers),
-}
-
-mason_lspconfig.setup_handlers {
-  function(server_name)
-    require('lspconfig')[server_name].setup {
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-    }
-  end,
-}
-
 -- Turn on lsp status information
 require('fidget').setup()
+
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
@@ -286,28 +248,57 @@ cmp.setup {
 }
 
 
--- Language specific settings
+--[[ Language specific settings ]]--
+local lspconfig = require('lspconfig')
+
+-- python
+-- `npm install -g pyright`
+lspconfig.pyright.setup{
+  on_attach = on_attach,
+  capabilities = capabilities,
+  settings = {
+    autoSearchPaths = true,
+    diagnosticMode = 'workspace',
+  },
+}
+
+-- golang
+-- `go install golang.org/x/tools/gopls@latest`
 vim.api.nvim_create_autocmd('FileType', {
   pattern = "go",
   callback = function()
     vim.bo.tabstop = 4
   end
 })
+lspconfig.gopls.setup{
+  on_attach = on_attach,
+  capabilities = capabilities,
+}
 
+-- javascript, typescript
+-- `npm install -g typescript typescript-language-server`
+lspconfig.tsserver.setup{
+  on_attach = on_attach,
+  capabilities = capabilities,
+}
 
--- Load old vim plugins
-local ensure_plug = function()
-  local fn = vim.fn
-  local install_path = fn.stdpath('data') .. '/site/autoload/plug.vim'
-  if fn.empty(fn.glob(install_path)) > 0 then
-    fn.system{'curl', '-fLo', install_path, '--create-dirs',
-              'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'}
-  end
-end
-ensure_plug()
+-- protobuf
+-- `go install github.com/bufbuild/buf-language-server/cmd/bufls@latest`
+lspconfig.bufls.setup{
+  on_attach = on_attach,
+  capabilities = capabilities,
+}
 
-vim.cmd[[
-call plug#begin('~/.local/share/nvim/plugged')
-Plug 'jlanzarotta/bufexplorer'
-call plug#end()
-]]
+-- lua
+-- `brew install lua-language-server`
+require('neodev').setup() -- neovim lua
+lspconfig['sumneko_lua'].setup{
+  on_attach = on_attach,
+  capabilities = capabilities,
+  settings = {
+    Lua = {
+      workspace = { checkThirdParty = false },
+      telemetry = { enable = false },
+    },
+  }
+}
