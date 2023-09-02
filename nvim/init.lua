@@ -230,6 +230,7 @@ local lspconfig = require('lspconfig')
 lspconfig.pyright.setup{
   on_attach = on_attach,
   capabilities = capabilities,
+  root_dir = lspconfig.util.root_pattern('pyproject.toml'),
   settings = {
     autoSearchPaths = true,
     diagnosticMode = 'workspace',
@@ -252,6 +253,13 @@ lspconfig.gopls.setup{
 -- javascript, typescript
 -- `npm install -g typescript typescript-language-server`
 lspconfig.tsserver.setup{
+  on_attach = on_attach,
+  capabilities = capabilities,
+}
+
+-- Vue
+-- `npm install -g vls`
+lspconfig.vuels.setup{
   on_attach = on_attach,
   capabilities = capabilities,
 }
