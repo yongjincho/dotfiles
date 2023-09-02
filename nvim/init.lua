@@ -21,7 +21,6 @@ require('packer').startup(function(use)
   use 'nvim-lualine/lualine.nvim' -- Fancier statusline
 
   -- Editor
-  use 'lukas-reineke/indent-blankline.nvim' -- Add indentation guides even on blank lines
   use 'numToStr/Comment.nvim'
 
   -- Languages
@@ -33,12 +32,12 @@ require('packer').startup(function(use)
   use 'lewis6991/gitsigns.nvim'
 
   -- Telescope
-  use { 'nvim-telescope/telescope.nvim', tag = '0.1.0', requires = { 'nvim-lua/plenary.nvim' } }
+  use { 'nvim-telescope/telescope.nvim', tag = '0.1.2', requires = { 'nvim-lua/plenary.nvim' } }
   use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable 'make' == 1 }
 
   -- LSP
   use 'neovim/nvim-lspconfig'
-  use 'j-hui/fidget.nvim' -- Useful status updates for LSP
+  use { 'j-hui/fidget.nvim', tag = 'legacy' } -- Useful status updates for LSP
 
   -- Autocompletion
   use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
@@ -57,24 +56,6 @@ end)
 if packer_bootstrap then
   return
 end
-
-
--- Load old vim plugins
-local ensure_plug = function()
-  local fn = vim.fn
-  local install_path = fn.stdpath('data') .. '/site/autoload/plug.vim'
-  if fn.empty(fn.glob(install_path)) > 0 then
-    fn.system{'curl', '-fLo', install_path, '--create-dirs',
-              'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'}
-  end
-end
-ensure_plug()
-
-vim.cmd[[
-call plug#begin('~/.local/share/nvim/plugged')
-Plug 'jlanzarotta/bufexplorer'
-call plug#end()
-]]
 
 
 -- General options (`:help vim.o`)
@@ -112,15 +93,6 @@ require('lualine').setup {
 }
 
 
--- indent_blankline
--- vim.opt.list = true
--- vim.opt.listchars:append "eol:↴"
-require('indent_blankline').setup {
-  show_end_of_line = true,
-  show_trailing_blankline_indent = false,
-}
-
-
 -- Enable Comment.nvim
 require('Comment').setup()
 
@@ -142,7 +114,7 @@ nmap('<leader><space>', function ()
     path_display = function(_, path)
       local tail = require("telescope.utils").path_tail(path)
       if tail == path then
-        return string.format(path)
+        return path
       else
         local head = string.sub(path, 0, string.len(path)-string.len(tail)-1)
         return string.format("%s (%s)", tail, head)
@@ -249,6 +221,8 @@ cmp.setup {
 
 
 --[[ Language specific settings ]]--
+-- IMPORTANT: make sure to setup neodev BEFORE lspconfig
+require('neodev').setup() -- neovim lua
 local lspconfig = require('lspconfig')
 
 -- python
@@ -291,14 +265,16 @@ lspconfig.bufls.setup{
 
 -- lua
 -- `brew install lua-language-server`
-require('neodev').setup() -- neovim lua
-lspconfig['sumneko_lua'].setup{
+lspconfig.lua_ls.setup{
   on_attach = on_attach,
   capabilities = capabilities,
   settings = {
     Lua = {
-      workspace = { checkThirdParty = false },
-      telemetry = { enable = false },
-    },
-  }
+      diagnostics = {
+        globals = {
+          'vim',
+        },
+      },
+    }
+  },
 }
