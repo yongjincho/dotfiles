@@ -33,7 +33,8 @@ require('packer').startup(function(use)
 
   -- Telescope
   use { 'nvim-telescope/telescope.nvim', tag = '0.1.2', requires = { 'nvim-lua/plenary.nvim' } }
-  use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable 'make' == 1 }
+  use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
+
 
   -- LSP
   use 'neovim/nvim-lspconfig'
@@ -230,7 +231,7 @@ local lspconfig = require('lspconfig')
 lspconfig.pyright.setup{
   on_attach = on_attach,
   capabilities = capabilities,
-  root_dir = lspconfig.util.root_pattern('pyproject.toml'),
+  root_dir = lspconfig.util.root_pattern('pyrightconfig.json'),
   settings = {
     autoSearchPaths = true,
     diagnosticMode = 'workspace',
@@ -286,3 +287,19 @@ lspconfig.lua_ls.setup{
     }
   },
 }
+
+
+-- Github Copilot
+vim.g.copilot_filetypes = {
+   ["*"] = false,
+   ["html"] = true,
+   ["css"] = true,
+   ["javascript"] = true,
+   ["typescript"] = true,
+   ["lua"] = true,
+   ["go"] = true,
+   ["python"] = true,
+}
+vim.g.copilot_no_tab_map = true
+vim.api.nvim_set_keymap("i", "<C-J>", 'copilot#Accept("<CR>")', { silent = true, expr = true, replace_keycodes = false })
+vim.api.nvim_set_keymap("i", "<C-ㅏ>", 'copilot#Accept("<CR>")', { silent = true, expr = true, replace_keycodes = false })

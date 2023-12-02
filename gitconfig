@@ -12,6 +12,7 @@
 	ff = only
 [pager]
 	branch = false
+	stash = false
 [url "ssh://git@github.com/"]
 	insteadOf = https://github.com/
 [init]
