@@ -11,7 +11,6 @@
 [pull]
 	ff = only
 [pager]
-	diff = false
 	branch = false
 	stash = false
 [url "ssh://git@github.com/"]

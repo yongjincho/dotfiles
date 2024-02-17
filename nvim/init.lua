@@ -1,305 +1,275 @@
--- Packer
-local ensure_packer = function()
-  local fn = vim.fn
-  local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
-  if fn.empty(fn.glob(install_path)) > 0 then
-    fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
-    vim.cmd [[packadd packer.nvim]]
-    return true
-  end
-  return false
-end
-
-local packer_bootstrap = ensure_packer()
-
-require('packer').startup(function(use)
-  use 'wbthomason/packer.nvim'
-
-  -- General
-  use 'morhetz/gruvbox' -- Colorscheme
-  use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
-  use 'nvim-lualine/lualine.nvim' -- Fancier statusline
-
-  -- Editor
-  use 'numToStr/Comment.nvim'
-
-  -- Languages
-  use 'fatih/vim-go'
-
-  -- Git
-  use 'tpope/vim-fugitive'
-  use 'tpope/vim-rhubarb'
-  use 'lewis6991/gitsigns.nvim'
-
-  -- Telescope
-  use { 'nvim-telescope/telescope.nvim', tag = '0.1.2', requires = { 'nvim-lua/plenary.nvim' } }
-  use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
-
-
-  -- LSP
-  use 'neovim/nvim-lspconfig'
-  use { 'j-hui/fidget.nvim', tag = 'legacy' } -- Useful status updates for LSP
-
-  -- Autocompletion
-  use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
-  use 'hrsh7th/cmp-nvim-lsp'
-  use 'L3MON4D3/LuaSnip' -- Snippets plugin
-  use 'saadparwaiz1/cmp_luasnip'
-
-  -- Additional lua configuration, makes nvim stuff amazing
-  use 'folke/neodev.nvim'
-
-  if packer_bootstrap then
-    require('packer').sync()
-  end
-end)
-
-if packer_bootstrap then
-  return
-end
-
-
--- General options (`:help vim.o`)
+--------------------------------------------------------------------------------
+-- Genernal settings
+--------------------------------------------------------------------------------
 vim.o.number = true
 vim.o.termguicolors = true
--- Use gruvbox theme
-vim.cmd [[colorscheme gruvbox]]
-vim.o.bg = 'light'
 -- Case insensitive search
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
+vim.g.mapleader = " "
+-- vim.keymap.set({ "n", "v" }, "<Space>", "<Nop>", { silent = true })
 
--- General shorcuts
-local nmap = function(lhs, rhs, opts)
-  opts = opts or {}
-  vim.keymap.set('n', lhs, rhs, opts)
+-- General keymapping
+local nmap = function(lhs, rhs, desc)
+  desc = desc or ""
+  vim.keymap.set("n", lhs, rhs, { desc = desc })
 end
 
-vim.g.mapleader = ' '
-vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+nmap("<leader>E", function () vim.cmd("Explore") end, "File Explore")
+nmap("<leader>e", vim.diagnostic.open_float, "Show float diagnostic")
+nmap("[d", vim.diagnostic.goto_prev, "Prev diagnostic")
+nmap("]d", vim.diagnostic.goto_next, "Next diagnostic")
+nmap("<leader>q", vim.diagnostic.setloclist)
 
-
--- lualine
-require('lualine').setup {
-  options = {
-    icons_enabled = false,
-    theme = 'gruvbox_light',
+--------------------------------------------------------------------------------
+-- UI
+--------------------------------------------------------------------------------
+local gruvbox = {
+  "ellisonleao/gruvbox.nvim",
+  lazy = false,
+  priority = 1000,
+  config = function()
+    vim.o.background = "light"
+    vim.cmd("colorscheme gruvbox")
+  end
+}
+local lualine = {
+  "nvim-lualine/lualine.nvim",
+  opts = {
+    options = {
+      theme = "gruvbox_light",
+      icons_enabled = false,
+    },
+    sections = {
+      lualine_c = {
+        { "filename", path = 1 },
+      }
+    },
   },
-  sections = {
-    lualine_c = {
-      { 'filename', path = 1 },
-    }
-  }
+}
+local whichkey = {
+  "folke/which-key.nvim",
+  event = "VeryLazy",
+  init = function()
+    vim.o.timeout = true
+    vim.o.timeoutlen = 300
+  end,
+  config = true
 }
 
-
--- Enable Comment.nvim
-require('Comment').setup()
-
-
--- gitsigns (`:help gitsigns.txt`)
-require('gitsigns').setup {
-  --current_line_blame = true,
-}
-
-
+--------------------------------------------------------------------------------
 -- Telescope
-local telescope = require('telescope.builtin')
-pcall(require('telescope').load_extension, 'fzf') -- `brew install ripgrep` for live_grep
-nmap('<leader><space>', function ()
-  telescope.buffers{
-    sort_mru = true,
-    initial_mode = 'normal',
-    ignore_current_buffer = true,
-    path_display = function(_, path)
-      local tail = require("telescope.utils").path_tail(path)
-      if tail == path then
-        return path
-      else
-        local head = string.sub(path, 0, string.len(path)-string.len(tail)-1)
-        return string.format("%s (%s)", tail, head)
-      end
-    end,
-  }
-end)
-nmap('<leader>ff', telescope.find_files)
-nmap('<leader>fg', telescope.live_grep)
-nmap('<leader>fh', telescope.help_tags)
+--------------------------------------------------------------------------------
+local telescope = {
+  "nvim-telescope/telescope.nvim",
+  tag = "0.1.5",
+  dependencies = { "nvim-lua/plenary.nvim" },
+  config = function()
+    local builtin = require("telescope.builtin")
+    nmap("<leader><space>", function()
+      builtin.buffers {
+        sort_mru = true,
+        initial_mode = "normal",
+        ignore_current_buffer = true,
+        path_display = function(_, path)
+          local tail = require("telescope.utils").path_tail(path)
+          if tail == path then
+            return path
+          else
+            local head = string.sub(path, 0, string.len(path) - string.len(tail) - 1)
+            return string.format("%s (%s)", tail, head)
+          end
+        end,
+      }
+    end, "Find buffers")
+    nmap("<leader>ff", builtin.find_files, "Find files")
+    nmap("<leader>fg", builtin.live_grep, "Live grep")
+    nmap("<leader>fh", builtin.help_tags, "Find help")
+  end,
+}
+local fzf = {
+  "nvim-telescope/telescope-fzf-native.nvim",
+  build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build",
+  dependencies = { "nvim-telescope/telescope.nvim" },
+  config = function()
+    require("telescope").load_extension("fzf")
+  end,
+}
 
+--------------------------------------------------------------------------------
+-- Coding
+--------------------------------------------------------------------------------
+local tabstop = { "tpope/vim-sleuth" } -- Detect tabstop and shiftwidth automatically
+local comment = { "echasnovski/mini.comment", version = "*", config = true }
+local fugitive = { "tpope/vim-fugitive" }
+local gitsigns = { "lewis6991/gitsigns.nvim", opts = { current_line_blame = true } }
 
--- LSP settings.
--- Diagnostic keymaps
-nmap('[d', vim.diagnostic.goto_prev)
-nmap(']d', vim.diagnostic.goto_next)
-nmap('<leader>e', vim.diagnostic.open_float)
-nmap('<leader>q', vim.diagnostic.setloclist)
-
---  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(_, bufnr)
-  local lmap = function(keys, func, desc)
-    if desc then
-      desc = 'LSP: ' .. desc
-    end
-    vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+--------------------------------------------------------------------------------
+-- LSP & Copilot
+--------------------------------------------------------------------------------
+local on_attach = function (_, bufnr)
+  local lmap = function (keys, func, desc)
+    vim.keymap.set("n", keys, func, { buffer = bufnr, desc = desc })
   end
 
-  lmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-  lmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+  lmap("K", vim.lsp.buf.hover, "Hover documentation")
+  lmap("<C-k>", vim.lsp.buf.signature_help, "Signature help")
 
-  lmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
-  lmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-  lmap('gr', telescope.lsp_references, '[G]oto [R]eferences')
-  lmap('gI', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
-  lmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
-  lmap('<leader>ds', telescope.lsp_document_symbols, '[D]ocument [S]ymbols')
-  lmap('<leader>ws', telescope.lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+  lmap("gd", vim.lsp.buf.definition, "Goto definition")
+  lmap("gr", vim.lsp.buf.references, "Goto references")
+  lmap("gD", vim.lsp.buf.declaration, "Goto declaration")
+  lmap("gi", vim.lsp.buf.implementation, "Goto implementation")
 
-  -- See `:help K` for why this keymap
-  lmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  lmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
-
-  -- Lesser used LSP functionality
-  lmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
-  lmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
-  lmap('<leader>wl', function() print(vim.inspect(vim.lsp.buf.list_workspace_folders())) end, '[W]orkspace [L]ist Folders')
-
-  -- Create a command `:Format` local to the LSP buffer
-  vim.api.nvim_buf_create_user_command(bufnr, 'Format', function() vim.lsp.buf.format() end, { desc = 'Format current buffer with LSP' })
+  lmap("<space>D", vim.lsp.buf.type_definition, "Type definition")
+  lmap("<space>rn", vim.lsp.buf.rename, "Rename")
+  lmap("<space>ca", vim.lsp.buf.code_action, "Code action")
+  lmap("<space>f", function()
+    vim.lsp.buf.format { async = true }
+  end, "Format")
 end
 
--- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
-
--- Turn on lsp status information
-require('fidget').setup()
-
-
--- nvim-cmp setup
-local cmp = require 'cmp'
-local luasnip = require 'luasnip'
-
-cmp.setup {
-  snippet = {
-    expand = function(args)
-      luasnip.lsp_expand(args.body)
-    end,
+local lspconfig = {
+  "neovim/nvim-lspconfig",
+  dependencies = { "folke/neodev.nvim" },
+}
+local mason = { "williamboman/mason.nvim", config = true }
+local mason_lspconfig = {
+  "williamboman/mason-lspconfig.nvim",
+  dependencies = {
+    "neovim/nvim-lspconfig",
+    "williamboman/mason.nvim",
   },
-  mapping = cmp.mapping.preset.insert {
-    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.abort,
-    ['<CR>'] = cmp.mapping.confirm {
-      --behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
+  opts = {
+    ensure_installed = {
+      "lua_ls",
+      "pyright",
+      "gopls",
     },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-  },
-  sources = {
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
-  },
-}
-
-
---[[ Language specific settings ]]--
--- IMPORTANT: make sure to setup neodev BEFORE lspconfig
-require('neodev').setup() -- neovim lua
-local lspconfig = require('lspconfig')
-
--- python
--- `npm install -g pyright`
-lspconfig.pyright.setup{
-  on_attach = on_attach,
-  capabilities = capabilities,
-  root_dir = lspconfig.util.root_pattern('pyrightconfig.json'),
-  settings = {
-    autoSearchPaths = true,
-    diagnosticMode = 'workspace',
+    handlers = {
+      -- Default handler
+      function(server_name)
+        require("lspconfig")[server_name].setup {
+          on_attach = on_attach,
+        }
+      end,
+      -- Language specific handlers
+      ["lua_ls"] = function()
+        require("lspconfig").lua_ls.setup{
+          settings = {
+            Lua = { diagnostics = { globals = { "vim" } } }
+          }
+        }
+      end,
+      ["pyright"] = function()
+        local lspcfg = require("lspconfig")
+        lspcfg.pyright.setup {
+          on_attach = on_attach,
+          root_dir = lspcfg.util.root_pattern("pyrightconfig.json"),
+          settings = {
+            autoSearchPaths = true,
+            diagnosticMode = "workspace",
+          },
+        }
+      end,
+    },
   },
 }
+local copilot = {
+  "zbirenbaum/copilot.lua",
+  opts = {
+    suggestion = { enabled = false },
+    panel = { enabled = false },
+  },
+}
+-- Autocompletion
+local cmp = {
+  "hrsh7th/nvim-cmp",
+  dependencies = {
+    "L3MON4D3/LuaSnip",
+    "hrsh7th/cmp-nvim-lsp",
+    "zbirenbaum/copilot-cmp",
+  },
+  config = function ()
+    local cmp = require("cmp")
+    cmp.setup {
+      snippet = {
+        expand = function(args)
+          require("luasnip").lsp_expand(args.body)
+        end,
+      },
+      mapping = cmp.mapping.preset.insert({
+        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+        ["<C-f>"] = cmp.mapping.scroll_docs(4),
+        ["<C-Space>"] = cmp.mapping.complete(),
+        ["<C-e>"] = cmp.mapping.abort(),
+        ["<CR>"] = cmp.mapping.confirm({ select = false }),
+      }),
+      sources = cmp.config.sources({
+        { name = "nvim_lsp" },
+        { name = "copilot" },
+      })
+    }
+  end,
+}
 
--- golang
--- `go install golang.org/x/tools/gopls@latest`
-vim.api.nvim_create_autocmd('FileType', {
+--------------------------------------------------------------------------------
+-- Language specific settings
+--------------------------------------------------------------------------------
+-- Neovim Lua
+local neodev = { "folke/neodev.nvim", config = true }
+-- Go
+vim.api.nvim_create_autocmd("FileType", {
   pattern = "go",
   callback = function()
     vim.bo.tabstop = 4
   end
 })
-lspconfig.gopls.setup{
-  on_attach = on_attach,
-  capabilities = capabilities,
+-- Markdown
+local markdown = {
+  "iamcco/markdown-preview.nvim",
+  cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+  build = "cd app && yarn install",
+  init = function()
+    vim.g.mkdp_filetypes = { "markdown" }
+  end,
+  ft = { "markdown" },
 }
 
--- javascript, typescript
--- `npm install -g typescript typescript-language-server`
-lspconfig.tsserver.setup{
-  on_attach = on_attach,
-  capabilities = capabilities,
-}
+--------------------------------------------------------------------------------
+-- Packages Manager
+--------------------------------------------------------------------------------
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable",
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
 
--- Vue
--- `npm install -g vls`
-lspconfig.vuels.setup{
-  on_attach = on_attach,
-  capabilities = capabilities,
+-- Load packages
+require("lazy").setup {
+  -- UI
+  gruvbox,
+  lualine,
+  whichkey,
+  -- Telescope
+  telescope,
+  fzf,
+  -- Coding
+  tabstop,
+  comment,
+  fugitive,
+  gitsigns,
+  -- LSP & Copilot
+  lspconfig,
+  mason,
+  mason_lspconfig,
+  copilot,
+  cmp,
+  -- Language
+  neodev,
+  markdown,
 }
-
--- protobuf
--- `go install github.com/bufbuild/buf-language-server/cmd/bufls@latest`
-lspconfig.bufls.setup{
-  on_attach = on_attach,
-  capabilities = capabilities,
-}
-
--- lua
--- `brew install lua-language-server`
-lspconfig.lua_ls.setup{
-  on_attach = on_attach,
-  capabilities = capabilities,
-  settings = {
-    Lua = {
-      diagnostics = {
-        globals = {
-          'vim',
-        },
-      },
-    }
-  },
-}
-
-
--- Github Copilot
-vim.g.copilot_filetypes = {
-   ["*"] = false,
-   ["html"] = true,
-   ["css"] = true,
-   ["javascript"] = true,
-   ["typescript"] = true,
-   ["lua"] = true,
-   ["go"] = true,
-   ["python"] = true,
-}
-vim.g.copilot_no_tab_map = true
-vim.api.nvim_set_keymap("i", "<C-J>", 'copilot#Accept("<CR>")', { silent = true, expr = true, replace_keycodes = false })
-vim.api.nvim_set_keymap("i", "<C-ㅏ>", 'copilot#Accept("<CR>")', { silent = true, expr = true, replace_keycodes = false })
