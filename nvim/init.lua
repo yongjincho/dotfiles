@@ -165,7 +165,7 @@ local mason_lspconfig = {
         local lspcfg = require("lspconfig")
         lspcfg.pyright.setup {
           on_attach = on_attach,
-          root_dir = lspcfg.util.root_pattern("pyrightconfig.json"),
+          root_dir = lspcfg.util.root_pattern("requirements.txt", "pyproject.toml", "pyrightconfig.json"),
           settings = {
             autoSearchPaths = true,
             diagnosticMode = "workspace",
@@ -177,6 +177,7 @@ local mason_lspconfig = {
 }
 local copilot = {
   "zbirenbaum/copilot.lua",
+  event = "InsertEnter",
   opts = {
     suggestion = { enabled = false },
     panel = { enabled = false },
@@ -188,7 +189,13 @@ local cmp = {
   dependencies = {
     "L3MON4D3/LuaSnip",
     "hrsh7th/cmp-nvim-lsp",
-    "zbirenbaum/copilot-cmp",
+    {
+      "zbirenbaum/copilot-cmp",
+      -- Explicitly initializated because automatic detection of the module name failed
+      config = function ()
+        require("copilot_cmp").setup()
+      end
+    },
   },
   config = function ()
     local cmp = require("cmp")
@@ -206,8 +213,8 @@ local cmp = {
         ["<CR>"] = cmp.mapping.confirm({ select = false }),
       }),
       sources = cmp.config.sources({
-        { name = "nvim_lsp" },
         { name = "copilot" },
+        { name = "nvim_lsp" },
       })
     }
   end,
