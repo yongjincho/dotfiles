@@ -210,13 +210,7 @@ local cmp = {
   dependencies = {
     "L3MON4D3/LuaSnip",
     "hrsh7th/cmp-nvim-lsp",
-    {
-      "zbirenbaum/copilot-cmp",
-      -- Explicitly initializated because automatic detection of the module name failed
-      config = function ()
-        require("copilot_cmp").setup()
-      end
-    },
+    { "zbirenbaum/copilot-cmp", config = true },
   },
   config = function ()
     local cmp = require("cmp")
