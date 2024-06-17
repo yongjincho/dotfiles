@@ -127,6 +127,21 @@ local gitsigns = {
 }
 
 --------------------------------------------------------------------------------
+-- Treesitter
+--------------------------------------------------------------------------------
+local treesitter = {
+  'nvim-treesitter/nvim-treesitter',
+  config = function()
+    require("nvim-treesitter.configs").setup{
+      auto_install = true,
+      highlight = { enable = true },
+      indent = { enable = true },
+    }
+  end,
+  build = ':TSUpdate',
+}
+
+--------------------------------------------------------------------------------
 -- LSP & Copilot
 --------------------------------------------------------------------------------
 local on_attach = function (_, bufnr)
@@ -247,6 +262,14 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.bo.tabstop = 4
   end
 })
+local golang = {
+  "ray-x/go.nvim",
+  dependencies = { "ray-x/guihua.lua" },
+  config = true,
+  event = {"CmdlineEnter"},
+  ft = {"go", 'gomod'},
+  build = ':lua require("go.install").update_all_sync()'
+}
 -- Markdown
 local markdown = {
   "iamcco/markdown-preview.nvim",
@@ -287,6 +310,8 @@ require("lazy").setup {
   comment,
   fugitive,
   gitsigns,
+  -- Treesitter
+  treesitter,
   -- LSP & Copilot
   lspconfig,
   mason,
@@ -294,6 +319,7 @@ require("lazy").setup {
   copilot,
   cmp,
   -- Language
+  golang,
   neodev,
   markdown,
 }
