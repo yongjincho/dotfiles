@@ -27,7 +27,6 @@ nmap("<leader>q", vim.diagnostic.setloclist)
 --------------------------------------------------------------------------------
 local gruvbox = {
   "ellisonleao/gruvbox.nvim",
-  lazy = false,
   priority = 1000,
   config = function()
     vim.o.background = "light"
@@ -56,6 +55,20 @@ local whichkey = {
     vim.o.timeoutlen = 300
   end,
   config = true
+}
+
+--------------------------------------------------------------------------------
+-- NERDTree
+--------------------------------------------------------------------------------
+local nerdtree = {
+  "preservim/nerdtree",
+  config = function()
+    vim.g.NERDTreeShowHidden = 1
+    nmap("<leader>n", function() vim.cmd("NERDTreeFocus") end, "Focus to NERDTree")
+    nmap("<leader>N", function() vim.cmd("NERDTreeClose") end, "Close NERDTree")
+    nmap("<C-f>", function() vim.cmd("NERDTreeFind") end, "Find this file in NERDTree")
+  end,
+  keys = {"<leader>n", "<leader>N", "<C-f>"},
 }
 
 --------------------------------------------------------------------------------
@@ -262,6 +275,8 @@ require("lazy").setup {
   gruvbox,
   lualine,
   whichkey,
+  -- NERDTree
+  nerdtree,
   -- Telescope
   telescope,
   fzf,
