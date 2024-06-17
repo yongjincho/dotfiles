@@ -76,7 +76,7 @@ local nerdtree = {
 --------------------------------------------------------------------------------
 local telescope = {
   "nvim-telescope/telescope.nvim",
-  tag = "0.1.5",
+  tag = "0.1.6",
   dependencies = { "nvim-lua/plenary.nvim" },
   config = function()
     local builtin = require("telescope.builtin")
@@ -116,7 +116,15 @@ local fzf = {
 local tabstop = { "tpope/vim-sleuth" } -- Detect tabstop and shiftwidth automatically
 local comment = { "echasnovski/mini.comment", version = "*", config = true }
 local fugitive = { "tpope/vim-fugitive" }
-local gitsigns = { "lewis6991/gitsigns.nvim", opts = { current_line_blame = true } }
+local gitsigns = {
+  "lewis6991/gitsigns.nvim",
+  config = function()
+    local gitsigns = require('gitsigns')
+    gitsigns.setup{ current_line_blame = true }
+    vim.api.nvim_create_user_command("GitsignsDetach", function() gitsigns.detach() end, {})
+    vim.api.nvim_create_user_command("GitsignsAttach", function() gitsigns.attach() end, {})
+  end
+}
 
 --------------------------------------------------------------------------------
 -- LSP & Copilot
