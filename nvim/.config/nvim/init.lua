@@ -3,6 +3,7 @@
 --------------------------------------------------------------------------------
 vim.o.number = true
 vim.o.termguicolors = true
+vim.o.colorcolumn = "81"
 -- Case insensitive search
 vim.o.ignorecase = true
 vim.o.smartcase = true
@@ -16,8 +17,7 @@ local nmap = function(lhs, rhs, desc)
   vim.keymap.set("n", lhs, rhs, { desc = desc })
 end
 
-nmap("<leader>E", function () vim.cmd("Explore") end, "File Explore")
-nmap("<leader>e", vim.diagnostic.open_float, "Show float diagnostic")
+nmap("<leader>d", vim.diagnostic.open_float, "Show float diagnostic")
 nmap("[d", vim.diagnostic.goto_prev, "Prev diagnostic")
 nmap("]d", vim.diagnostic.goto_next, "Next diagnostic")
 nmap("<leader>q", vim.diagnostic.setloclist)
@@ -58,17 +58,27 @@ local whichkey = {
 }
 
 --------------------------------------------------------------------------------
--- NERDTree
+-- File Explorer
 --------------------------------------------------------------------------------
-local nerdtree = {
-  "preservim/nerdtree",
-  config = function()
-    vim.g.NERDTreeShowHidden = 1
-    nmap("<leader>n", function() vim.cmd("NERDTreeFocus") end, "Focus to NERDTree")
-    nmap("<leader>N", function() vim.cmd("NERDTreeClose") end, "Close NERDTree")
-    nmap("<C-f>", function() vim.cmd("NERDTreeFind") end, "Find this file in NERDTree")
+local nvimtree = {
+  "nvim-tree/nvim-tree.lua",
+  opts = {
+    sort = {
+      sorter = "case_sensitive",
+    },
+    view = {
+      width = 30,
+    },
+    renderer = {
+      group_empty = true,
+    },
+  },
+  config = function (_, opts)
+    require("nvim-tree").setup(opts)
+    nmap("<leader>ee", vim.cmd.NvimTreeFocus, "Focus to nvim-tree")
+    nmap("<leader>ec", vim.cmd.NvimTreeClose, "Close nvim-tree")
+    nmap("<leader>ef", vim.cmd.NvimTreeFindFile, "Find this file in nvim-tree")
   end,
-  keys = {"<leader>n", "<leader>N", "<C-f>"},
 }
 
 --------------------------------------------------------------------------------
@@ -300,8 +310,8 @@ require("lazy").setup {
   gruvbox,
   lualine,
   whichkey,
-  -- NERDTree
-  nerdtree,
+  -- File Explorer
+  nvimtree,
   -- Telescope
   telescope,
   fzf,
