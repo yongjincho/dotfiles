@@ -69,6 +69,9 @@ local nvimtree = {
     view = {
       width = 30,
     },
+    filters = {
+      git_ignored = false,
+    },
     renderer = {
       group_empty = true,
     },
@@ -211,7 +214,7 @@ local mason_lspconfig = {
         local lspcfg = require("lspconfig")
         lspcfg.pyright.setup {
           on_attach = on_attach,
-          root_dir = lspcfg.util.root_pattern("requirements.txt", "pyproject.toml", "pyrightconfig.json"),
+          root_dir = lspcfg.util.root_pattern("requirements.txt", "pyproject.toml", "pyrightconfig.json", ".git"),
           settings = {
             autoSearchPaths = true,
             diagnosticMode = "workspace",
@@ -275,7 +278,18 @@ vim.api.nvim_create_autocmd("FileType", {
 local golang = {
   "ray-x/go.nvim",
   dependencies = { "ray-x/guihua.lua" },
-  config = true,
+  config = function ()
+    require("go").setup()
+
+    local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      pattern = "*.go",
+      callback = function()
+        require("go.format").goimports()
+      end,
+      group = format_sync_grp,
+    })
+  end,
   event = {"CmdlineEnter"},
   ft = {"go", 'gomod'},
   build = ':lua require("go.install").update_all_sync()'
