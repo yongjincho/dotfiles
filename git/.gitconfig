@@ -17,3 +17,5 @@
 	insteadOf = https://github.com/
 [init]
 	defaultBranch = main
+[core]
+	excludesfile = /Users/yongjin/.gitignore
