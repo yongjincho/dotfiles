@@ -25,19 +25,20 @@ nmap("<leader>q", vim.diagnostic.setloclist)
 --------------------------------------------------------------------------------
 -- UI
 --------------------------------------------------------------------------------
-local gruvbox = {
-  "ellisonleao/gruvbox.nvim",
+local solarized = {
+  'maxmx03/solarized.nvim',
+  lazy = false,
   priority = 1000,
   config = function()
-    vim.o.background = "light"
-    vim.cmd("colorscheme gruvbox")
-  end
+    vim.o.background = 'light'
+    vim.cmd.colorscheme 'solarized'
+  end,
 }
 local lualine = {
   "nvim-lualine/lualine.nvim",
   opts = {
     options = {
-      theme = "gruvbox_light",
+      theme = "solarized_light",
       icons_enabled = false,
     },
     sections = {
@@ -321,7 +322,7 @@ vim.opt.rtp:prepend(lazypath)
 -- Load packages
 require("lazy").setup {
   -- UI
-  gruvbox,
+  solarized,
   lualine,
   whichkey,
   -- File Explorer
