@@ -18,4 +18,4 @@
 [init]
 	defaultBranch = main
 [core]
-	excludesfile = /Users/yongjin/.gitignore
+	excludesfile = ~/.gitignore
