@@ -9,7 +9,6 @@ This is a personal dotfiles repository containing configuration files for develo
 ## Directory Structure
 
 - `nvim/` - Neovim configuration with Lua-based setup
-- `vim/` - Legacy Vim configuration with vimrc and plugin management
 - `tmux/` - Terminal multiplexer configuration
 - `git/` - Git configuration and aliases
 - `.claude/` - Claude Code settings (local permissions configuration)
@@ -34,18 +33,12 @@ This is a personal dotfiles repository containing configuration files for develo
 - Solarized light color scheme via tmux-colors-solarized plugin
 - Plugin management via TPM (Tmux Plugin Manager)
 
-### Vim (`vim/.vimrc`)
-- Legacy Vim configuration with vim-plug for plugin management
-- YouCompleteMe for code completion
-- Airline status bar with solarized theme
-- Language-specific indentation settings
 
 ## Installation/Setup Commands
 
 This repository doesn't have automated installation scripts. Configuration files are typically symlinked to their appropriate locations:
 
 - Neovim: `~/.config/nvim/init.lua` → `nvim/.config/nvim/init.lua`
-- Vim: `~/.vimrc` → `vim/.vimrc`
 - Tmux: `~/.tmux.conf` → `tmux/.tmux.conf`
 - Git: `~/.gitconfig` → `git/.gitconfig`
 
@@ -72,7 +65,6 @@ This repository doesn't have automated installation scripts. Configuration files
 All tools are configured with Solarized light theme for consistency:
 - Neovim: solarized.nvim with light background
 - Tmux: tmux-colors-solarized light variant
-- Vim: airline-solarized theme
 
 ## Language Support
 

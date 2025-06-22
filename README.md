@@ -9,7 +9,6 @@ This repository contains configuration files for various development tools, orga
 ## Tools Configured
 
 - **Neovim** - Modern Lua-based configuration with LSP, Copilot, and Claude Code integration
-- **Vim** - Legacy configuration with YouCompleteMe and vim-plug
 - **Tmux** - Terminal multiplexer with custom keybindings and Solarized theme
 - **Git** - Personal configuration with aliases and SSH preference
 
@@ -27,7 +26,6 @@ cd ~/.dotfiles
 
 # Use stow to create symlinks
 stow nvim
-stow vim  
 stow tmux
 stow git
 ```
@@ -40,7 +38,6 @@ cd ~/.dotfiles
 
 # Create symlinks manually
 ln -sf ~/.dotfiles/nvim/.config/nvim/init.lua ~/.config/nvim/init.lua
-ln -sf ~/.dotfiles/vim/.vimrc ~/.vimrc
 ln -sf ~/.dotfiles/tmux/.tmux.conf ~/.tmux.conf
 ln -sf ~/.dotfiles/git/.gitconfig ~/.gitconfig
 ```
