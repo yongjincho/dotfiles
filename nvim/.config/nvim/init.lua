@@ -9,7 +9,7 @@ vim.o.ignorecase = true
 vim.o.smartcase = true
 
 vim.g.mapleader = " "
--- vim.keymap.set({ "n", "v" }, "<Space>", "<Nop>", { silent = true })
+vim.g.maplocalleader = "\\"
 
 -- General keymapping
 local nmap = function(lhs, rhs, desc)
@@ -29,8 +29,11 @@ local solarized = {
   'maxmx03/solarized.nvim',
   lazy = false,
   priority = 1000,
-  config = function()
+  opts = {},
+  config = function(_, opts)
+    vim.o.termguicolors = true
     vim.o.background = 'light'
+    require('solarized').setup(opts)
     vim.cmd.colorscheme 'solarized'
   end,
 }
@@ -59,7 +62,7 @@ local whichkey = {
 }
 
 --------------------------------------------------------------------------------
--- File Explorer
+-- Explorer
 --------------------------------------------------------------------------------
 local nvimtree = {
   "nvim-tree/nvim-tree.lua",
@@ -85,14 +88,14 @@ local nvimtree = {
   end,
 }
 
---------------------------------------------------------------------------------
--- Telescope
---------------------------------------------------------------------------------
 local telescope = {
   "nvim-telescope/telescope.nvim",
-  tag = "0.1.6",
-  dependencies = { "nvim-lua/plenary.nvim" },
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+  },
   config = function()
+    require("telescope").load_extension("fzf")
     local builtin = require("telescope.builtin")
     nmap("<leader><space>", function()
       builtin.buffers {
@@ -115,14 +118,6 @@ local telescope = {
     nmap("<leader>fh", builtin.help_tags, "Find help")
   end,
 }
-local fzf = {
-  "nvim-telescope/telescope-fzf-native.nvim",
-  build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build",
-  dependencies = { "nvim-telescope/telescope.nvim" },
-  config = function()
-    require("telescope").load_extension("fzf")
-  end,
-}
 
 --------------------------------------------------------------------------------
 -- Coding
@@ -140,24 +135,14 @@ local gitsigns = {
   end
 }
 
---------------------------------------------------------------------------------
 -- Treesitter
---------------------------------------------------------------------------------
 local treesitter = {
   'nvim-treesitter/nvim-treesitter',
-  config = function()
-    require("nvim-treesitter.configs").setup{
-      auto_install = true,
-      highlight = { enable = true },
-      indent = { enable = true },
-    }
-  end,
+  lazy = false,
   build = ':TSUpdate',
 }
 
---------------------------------------------------------------------------------
--- LSP & Copilot
---------------------------------------------------------------------------------
+-- LSP
 local on_attach = function (_, bufnr)
   local lmap = function (keys, func, desc)
     vim.keymap.set("n", keys, func, { buffer = bufnr, desc = desc })
@@ -194,7 +179,6 @@ local mason_lspconfig = {
     ensure_installed = {
       "lua_ls",
       "pyright",
-      "gopls",
     },
     handlers = {
       -- Default handler
@@ -206,6 +190,7 @@ local mason_lspconfig = {
       -- Language specific handlers
       ["lua_ls"] = function()
         require("lspconfig").lua_ls.setup{
+          on_attach = on_attach,
           settings = {
             Lua = { diagnostics = { globals = { "vim" } } }
           }
@@ -217,29 +202,28 @@ local mason_lspconfig = {
           on_attach = on_attach,
           root_dir = lspcfg.util.root_pattern("requirements.txt", "pyproject.toml", "pyrightconfig.json", ".git"),
           settings = {
-            autoSearchPaths = true,
-            diagnosticMode = "workspace",
+            python = {
+              analysis = {
+                autoSearchPaths = true,
+                diagnosticMode = "workspace",
+              }
+            }
           },
         }
       end,
     },
   },
 }
-local copilot = {
-  "zbirenbaum/copilot.lua",
-  event = "InsertEnter",
-  opts = {
-    suggestion = { enabled = false },
-    panel = { enabled = false },
-  },
-}
+
 -- Autocompletion
 local cmp = {
   "hrsh7th/nvim-cmp",
   dependencies = {
-    "L3MON4D3/LuaSnip",
+    -- Sources
     "hrsh7th/cmp-nvim-lsp",
-    { "zbirenbaum/copilot-cmp", config = true },
+    -- Snippet
+    "L3MON4D3/LuaSnip",
+    "saadparwaiz1/cmp_luasnip",
   },
   config = function ()
     local cmp = require("cmp")
@@ -257,16 +241,16 @@ local cmp = {
         ["<CR>"] = cmp.mapping.confirm({ select = false }),
       }),
       sources = cmp.config.sources({
-        { name = "copilot" },
         { name = "nvim_lsp" },
+        { name = "luasnip" },
       })
     }
   end,
 }
 
 --------------------------------------------------------------------------------
----
----
+--- Agents
+--------------------------------------------------------------------------------
 local claude = {
   "coder/claudecode.nvim",
   dependencies = { "folke/snacks.nvim" },
@@ -291,32 +275,7 @@ local claude = {
 --------------------------------------------------------------------------------
 -- Neovim Lua
 local neodev = { "folke/neodev.nvim", config = true }
--- Go
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "go",
-  callback = function()
-    vim.bo.tabstop = 4
-  end
-})
-local golang = {
-  "ray-x/go.nvim",
-  dependencies = { "ray-x/guihua.lua" },
-  config = function ()
-    require("go").setup()
 
-    local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      pattern = "*.go",
-      callback = function()
-        require("go.format").goimports()
-      end,
-      group = format_sync_grp,
-    })
-  end,
-  event = {"CmdlineEnter"},
-  ft = {"go", 'gomod'},
-  build = ':lua require("go.install").update_all_sync()'
-}
 -- Markdown
 local markdown = {
   "iamcco/markdown-preview.nvim",
@@ -333,9 +292,11 @@ local markdown = {
 --------------------------------------------------------------------------------
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
+  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
   vim.fn.system({
-    "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable",
+    "git", "clone", "--filter=blob:none", "--branch=stable",
+    lazyrepo,
     lazypath,
   })
 end
@@ -347,27 +308,22 @@ require("lazy").setup {
   solarized,
   lualine,
   whichkey,
-  -- File Explorer
+  -- Explorer
   nvimtree,
-  -- Telescope
   telescope,
-  fzf,
   -- Coding
   tabstop,
   comment,
   fugitive,
   gitsigns,
-  -- Treesitter
   treesitter,
-  -- LSP & Copilot
   lspconfig,
   mason,
   mason_lspconfig,
-  claude,
-  copilot,
   cmp,
+  -- Agent
+  claude,
   -- Language
-  golang,
   neodev,
   markdown,
 }
