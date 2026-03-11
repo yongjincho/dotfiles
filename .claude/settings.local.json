@@ -3,7 +3,13 @@
     "allow": [
       "Bash(find:*)",
       "Bash(ls:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(echo $HOME)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(curl -fSL -s https://api.github.com/repos/neovim/neovim/releases/latest | python3 -c \"import sys,json; print\\(json.load\\(sys.stdin\\)['tag_name']\\)\")",
+      "Bash(curl -fSL -s https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | python3 -c \"import sys,json; print\\(json.load\\(sys.stdin\\)['tag_name']\\)\")",
+      "Bash(curl -fSL -s https://nodejs.org/dist/index.json | python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); print\\(next\\(e['version'] for e in data if e['lts']\\)\\)\")",
+      "Bash(mkdir -p ~/opt && rm -rf ~/opt/ripgrep && curl -fSL -o /tmp/ripgrep.tar.gz \"https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-x86_64-unknown-linux-musl.tar.gz\" && mkdir -p /tmp/ripgrep-extract && tar -xzf /tmp/ripgrep.tar.gz -C /tmp/ripgrep-extract && mkdir -p ~/opt/ripgrep && cp /tmp/ripgrep-extract/ripgrep-15.1.0-x86_64-unknown-linux-musl/rg ~/opt/ripgrep/rg && chmod +x ~/opt/ripgrep/rg && rm -rf /tmp/ripgrep.tar.gz /tmp/ripgrep-extract && ~/opt/ripgrep/rg --version | head -1)"
     ],
     "deny": []
   }
