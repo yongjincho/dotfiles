@@ -11,7 +11,7 @@ This is a personal dotfiles repository containing configuration files for develo
 - `nvim/` - Neovim configuration with Lua-based setup
 - `tmux/` - Terminal multiplexer configuration
 - `git/` - Git configuration and aliases
-- `.claude/` - Claude Code settings (local permissions configuration)
+- `.claude/` - Claude Code settings and skills (e.g., `/install` for dotfile symlinking)
 
 ## Key Configuration Files
 
@@ -36,8 +36,11 @@ This is a personal dotfiles repository containing configuration files for develo
 
 ## Installation/Setup Commands
 
-This repository doesn't have automated installation scripts. Configuration files are typically symlinked to their appropriate locations:
+Use the `/install` skill to symlink dotfiles to `$HOME` (mimics GNU Stow):
+- `/install` — install all packages (nvim, tmux, git)
+- `/install nvim` — install specific packages
 
+Manual symlink targets for reference:
 - Neovim: `~/.config/nvim/init.lua` → `nvim/.config/nvim/init.lua`
 - Tmux: `~/.tmux.conf` → `tmux/.tmux.conf`
 - Git: `~/.gitconfig` → `git/.gitconfig`
