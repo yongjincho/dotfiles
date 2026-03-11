@@ -143,26 +143,28 @@ local treesitter = {
 }
 
 -- LSP
-local on_attach = function (_, bufnr)
-  local lmap = function (keys, func, desc)
-    vim.keymap.set("n", keys, func, { buffer = bufnr, desc = desc })
-  end
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(event)
+    local lmap = function (keys, func, desc)
+      vim.keymap.set("n", keys, func, { buffer = event.buf, desc = desc })
+    end
 
-  lmap("K", vim.lsp.buf.hover, "Hover documentation")
-  lmap("<C-k>", vim.lsp.buf.signature_help, "Signature help")
+    lmap("K", vim.lsp.buf.hover, "Hover documentation")
+    lmap("<C-k>", vim.lsp.buf.signature_help, "Signature help")
 
-  lmap("gd", vim.lsp.buf.definition, "Goto definition")
-  lmap("gr", vim.lsp.buf.references, "Goto references")
-  lmap("gD", vim.lsp.buf.declaration, "Goto declaration")
-  lmap("gi", vim.lsp.buf.implementation, "Goto implementation")
+    lmap("gd", vim.lsp.buf.definition, "Goto definition")
+    lmap("gr", vim.lsp.buf.references, "Goto references")
+    lmap("gD", vim.lsp.buf.declaration, "Goto declaration")
+    lmap("gi", vim.lsp.buf.implementation, "Goto implementation")
 
-  lmap("<space>D", vim.lsp.buf.type_definition, "Type definition")
-  lmap("<space>rn", vim.lsp.buf.rename, "Rename")
-  lmap("<space>ca", vim.lsp.buf.code_action, "Code action")
-  lmap("<space>f", function()
-    vim.lsp.buf.format { async = true }
-  end, "Format")
-end
+    lmap("<space>D", vim.lsp.buf.type_definition, "Type definition")
+    lmap("<space>rn", vim.lsp.buf.rename, "Rename")
+    lmap("<space>ca", vim.lsp.buf.code_action, "Code action")
+    lmap("<space>f", function()
+      vim.lsp.buf.format { async = true }
+    end, "Format")
+  end,
+})
 
 local lspconfig = {
   "neovim/nvim-lspconfig",
@@ -180,39 +182,32 @@ local mason_lspconfig = {
       "lua_ls",
       "pyright",
     },
-    handlers = {
-      -- Default handler
-      function(server_name)
-        require("lspconfig")[server_name].setup {
-          on_attach = on_attach,
-        }
-      end,
-      -- Language specific handlers
-      ["lua_ls"] = function()
-        require("lspconfig").lua_ls.setup{
-          on_attach = on_attach,
-          settings = {
-            Lua = { diagnostics = { globals = { "vim" } } }
+  },
+  config = function(_, opts)
+    require("mason-lspconfig").setup(opts)
+
+    -- Lua
+    vim.lsp.config("lua_ls", {
+      settings = {
+        Lua = { diagnostics = { globals = { "vim" } } }
+      }
+    })
+
+    -- Python
+    vim.lsp.config("pyright", {
+      root_markers = { "requirements.txt", "pyproject.toml", "pyrightconfig.json", ".git" },
+      settings = {
+        python = {
+          analysis = {
+            autoSearchPaths = true,
+            diagnosticMode = "workspace",
           }
         }
-      end,
-      ["pyright"] = function()
-        local lspcfg = require("lspconfig")
-        lspcfg.pyright.setup {
-          on_attach = on_attach,
-          root_dir = lspcfg.util.root_pattern("requirements.txt", "pyproject.toml", "pyrightconfig.json", ".git"),
-          settings = {
-            python = {
-              analysis = {
-                autoSearchPaths = true,
-                diagnosticMode = "workspace",
-              }
-            }
-          },
-        }
-      end,
-    },
-  },
+      },
+    })
+
+    vim.lsp.enable({ "lua_ls", "pyright" })
+  end,
 }
 
 -- Autocompletion
