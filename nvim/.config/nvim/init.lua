@@ -85,6 +85,17 @@ local nvimtree = {
     nmap("<leader>ee", vim.cmd.NvimTreeFocus, "Focus to nvim-tree")
     nmap("<leader>ec", vim.cmd.NvimTreeClose, "Close nvim-tree")
     nmap("<leader>ef", vim.cmd.NvimTreeFindFile, "Find this file in nvim-tree")
+    nmap("<leader>es", function()
+      local api = require("nvim-tree.api")
+      local view = require("nvim-tree.view")
+      api.tree.close()
+      if view.View.side == "left" then
+        view.View.side = "right"
+      else
+        view.View.side = "left"
+      end
+      api.tree.open()
+    end, "NvimTree Left Right Toggle")
   end,
 }
 
