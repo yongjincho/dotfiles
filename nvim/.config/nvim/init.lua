@@ -129,7 +129,7 @@ local gitsigns = {
   "lewis6991/gitsigns.nvim",
   config = function()
     local gitsigns = require('gitsigns')
-    gitsigns.setup{ current_line_blame = true }
+    gitsigns.setup{ auto_attach = false, current_line_blame = true }
     vim.api.nvim_create_user_command("GitsignsDetach", function() gitsigns.detach() end, {})
     vim.api.nvim_create_user_command("GitsignsAttach", function() gitsigns.attach() end, {})
   end
@@ -275,7 +275,7 @@ local neodev = { "folke/neodev.nvim", config = true }
 local markdown = {
   "iamcco/markdown-preview.nvim",
   cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-  build = "cd app && yarn install",
+  build = "cd app && npm install",
   init = function()
     vim.g.mkdp_filetypes = { "markdown" }
   end,
