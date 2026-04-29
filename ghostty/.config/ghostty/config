@@ -1,0 +1,6 @@
+theme = iTerm2 Solarized Light
+
+font-family = D2CodingLigature Nerd Font
+font-size = 15
+
+copy-on-select = clipboard
