@@ -4,5 +4,6 @@
 .claude/settings.local.json
 
 # experiment
-/runs/
+/experiments
+/runs
 /docs/experiments/status.json
