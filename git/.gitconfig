@@ -18,13 +18,8 @@
 [init]
 	defaultBranch = main
 [core]
-	excludesfile = ~/.gitignore
+	excludesfile = ~/.gitignore_global
 	ignorecase = false
-	pager = delta
-[interactive]
-	diffFilter = delta --color-only
-[delta]
-	navigate = true
 [merge]
 	conflictStyle = zdiff3
 	precomposeunicode = true
