@@ -21,12 +21,9 @@ ghostty/.config/ghostty/config → ~/.config/ghostty/config
 Everything below a package root is a literal path under `$HOME`. When adding a file, place it at the
 path it should occupy in `$HOME` — never invent a flat name and map it later.
 
-Two files in `git/` break the mirror rule and must not be read as `$HOME` paths:
-
-- `git/.gitignore` — this repo's *own* ignore file, which merely happens to live inside the `git/`
-  package directory. Not confused with `git/.gitignore_global`, which *is* linked out to
-  `~/.gitignore_global` (referenced by `core.excludesfile`).
-- `git/gitconfig` — **deliberately has no leading dot and is never symlinked.** See below.
+One file breaks the mirror rule: `git/gitconfig` — **deliberately has no leading dot and is never
+symlinked.** See below. Everything else in `git/` is a normal package file; today that is only
+`git/.gitignore_global` → `~/.gitignore_global`, which `core.excludesFile` points at.
 
 ### `~/.gitconfig` is not managed — it includes the managed file
 

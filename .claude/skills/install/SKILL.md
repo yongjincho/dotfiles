@@ -41,5 +41,7 @@ Create symbolic links from this repository to `$HOME`, mimicking GNU Stow behavi
 - Never overwrite files without backing them up first.
 - If the user provides arguments (e.g., `$ARGUMENTS`), treat them as specific package names to install. If no arguments are given, install all packages.
 - Do NOT install the `.claude` directory itself as a dotfile package.
-- Do NOT symlink `git/gitconfig` (see the special case above). `git/.gitignore_global` IS
-  symlinked normally, to `~/.gitignore_global`.
+- The `git/` package contains exactly two linkable-or-referenced files: `git/gitconfig` (never
+  symlinked, see the special case above) and `git/.gitignore_global` (symlinked normally to
+  `~/.gitignore_global`). If a `git/.gitignore` ever reappears, it is a leftover from the retired
+  `core.excludesFile = ~/.gitignore` scheme — do not link it.
