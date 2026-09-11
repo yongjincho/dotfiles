@@ -45,8 +45,18 @@ Rules that follow from this:
   Sourcetree's sections live there legitimately.
 - Settings that should be version-controlled go in `git/gitconfig`. `git config --global` from the CLI
   writes to the shim instead, so a permanent change means editing `git/gitconfig` directly.
+- **`merge.conflictStyle` is the exception — it must stay out of `git/gitconfig`.** `zdiff3` needs
+  git >= 2.35; the kakao cluster runs 2.34.1, where it aborts `checkout`, `switch`, `cherry-pick`,
+  `revert` and `apply` with `fatal: unknown style 'zdiff3'`. Git dies while *parsing* config, so a
+  later override cannot rescue it — the value must never reach an old-git machine. `/install` picks
+  `zdiff3` or `diff3` from the local git version and writes it to the shim.
 - Included content comes *before* whatever the shim appends, so on a key set in both, the shim wins.
   `git/gitconfig` sets no difftool/mergetool keys, which is why there is no conflict today.
+
+**Other machines lag behind.** This repo is checked out on the clusters too, where `~/.gitconfig`
+may still be the old symlink to `git/.gitconfig`. Pulling the rename there leaves a dangling symlink,
+and git treats that as *no config at all* — silently, so `user.email`, `insteadOf` and
+`core.excludesFile` vanish with no error. Migrate a machine's shim before pulling, not after.
 
 **Diagnostic trap**: `git config --global --list` does not follow includes — it prints only
 `include.path`, making the managed settings look absent. Use `git config --list` or
@@ -112,7 +122,7 @@ unless asked.
   `r` reload). Plugins via TPM; `run '~/.tmux/plugins/tpm/tpm'` must stay the last line of the file.
   Reload with `tmux source-file ~/.tmux.conf`.
 - **git** (`git/gitconfig`): `pull.ff = only`, `core.ignorecase = false`,
-  `merge.conflictStyle = zdiff3`, and an `insteadOf` rule rewriting `https://github.com/` →
+  an `insteadOf` rule rewriting `https://github.com/` →
   `ssh://git@github.com/`. Verify with `git config --list --show-origin`, which shows which file
   each value came from — useful for telling managed settings from shim scribbles.
 - **`git/.gitignore_global`** carries ML-experiment ignores (`/experiments`, `/runs`,

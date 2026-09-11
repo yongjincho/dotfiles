@@ -20,7 +20,9 @@
 [core]
 	excludesfile = ~/.gitignore_global
 	ignorecase = false
+# merge.conflictStyle 은 여기 두지 않는다 — git < 2.35 는 zdiff3 을 모르고,
+# 알 수 없는 값은 설정 파싱 시점에 die() 하므로 나중 값으로 덮어써도 구제되지 않는다.
+# 머신별 ~/.gitconfig shim 에 /install 이 버전을 보고 기록한다.
 [merge]
-	conflictStyle = zdiff3
 	precomposeunicode = true
 	quotepath = false
