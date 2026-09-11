@@ -14,7 +14,6 @@ Each top-level directory is a **package** whose contents mirror `$HOME` exactly:
 ```
 nvim/.config/nvim/init.lua   →  ~/.config/nvim/init.lua
 tmux/.tmux.conf              →  ~/.tmux.conf
-git/.gitconfig               →  ~/.gitconfig
 git/.gitignore_global        →  ~/.gitignore_global
 ghostty/.config/ghostty/config → ~/.config/ghostty/config
 ```
@@ -22,17 +21,53 @@ ghostty/.config/ghostty/config → ~/.config/ghostty/config
 Everything below a package root is a literal path under `$HOME`. When adding a file, place it at the
 path it should occupy in `$HOME` — never invent a flat name and map it later.
 
-`git/.gitignore` is **not** a package file in this sense; it is this repo's own ignore file, sitting
-inside the `git/` package directory. Do not confuse it with `git/.gitignore_global`, which is the one
-that gets linked out to `~/.gitignore_global` (referenced by `core.excludesfile`).
+Two files in `git/` break the mirror rule and must not be read as `$HOME` paths:
+
+- `git/.gitignore` — this repo's *own* ignore file, which merely happens to live inside the `git/`
+  package directory. Not confused with `git/.gitignore_global`, which *is* linked out to
+  `~/.gitignore_global` (referenced by `core.excludesfile`).
+- `git/gitconfig` — **deliberately has no leading dot and is never symlinked.** See below.
+
+### `~/.gitconfig` is not managed — it includes the managed file
+
+`~/.gitconfig` used to be a symlink to this repo. Sourcetree rewrites difftool/mergetool sections via
+`git config --global` on every launch, writes follow the symlink, and the tracked file came back dirty
+after every launch. The split:
+
+```
+~/.gitconfig          real, untracked, machine-local  ← GUI tools scribble here freely
+    [include]
+        path = ~/.dotfiles/git/gitconfig
+
+git/gitconfig         tracked, managed                ← never linked, referenced in place
+```
+
+Rules that follow from this:
+
+- **Never restore `~/.gitconfig` as a symlink**, and never have `/install` back it up or overwrite it —
+  Sourcetree's sections live there legitimately.
+- Settings that should be version-controlled go in `git/gitconfig`. `git config --global` from the CLI
+  writes to the shim instead, so a permanent change means editing `git/gitconfig` directly.
+- Included content comes *before* whatever the shim appends, so on a key set in both, the shim wins.
+  `git/gitconfig` sets no difftool/mergetool keys, which is why there is no conflict today.
+
+**Diagnostic trap**: `git config --global --list` does not follow includes — it prints only
+`include.path`, making the managed settings look absent. Use `git config --list` or
+`git config --get <key>`, which resolve normally.
+
+XDG (`~/.config/git/config`) is not an alternative here: git reads it *only* when `~/.gitconfig` is
+absent, and if you delete `~/.gitconfig` then `git config --global` writes land in the XDG file
+instead — the pollution just moves. `core.excludesFile` likewise overrides `~/.config/git/ignore`
+entirely, so that path is dead in this setup.
 
 ### Installing
 
 `/install` (skill at `.claude/skills/install/SKILL.md`) walks packages, backs up any existing target
-to `<target>.bak.<timestamp>`, and symlinks. `/install nvim tmux` restricts to named packages.
+to `<target>.bak.<timestamp>`, and symlinks. `/install nvim tmux` restricts to named packages. It
+special-cases `git/gitconfig` (skips it, ensures the shim exists).
 
-**The skill's package list is hardcoded and currently stale** — it names `nvim`, `tmux`, `git` but
-not `ghostty`. Adding a new package means updating that list in `SKILL.md` too.
+**The skill's package list is hardcoded** — adding a new top-level package means updating that list
+in `SKILL.md` too.
 
 ## Neovim config architecture (`nvim/.config/nvim/init.lua`)
 
@@ -79,9 +114,10 @@ unless asked.
 - **tmux**: prefix-based bindings only (`|`/`-` split, `hjkl` navigate, `HJKL` resize, `S` sync-panes,
   `r` reload). Plugins via TPM; `run '~/.tmux/plugins/tpm/tpm'` must stay the last line of the file.
   Reload with `tmux source-file ~/.tmux.conf`.
-- **git**: `pull.ff = only`, `core.ignorecase = false`, `merge.conflictStyle = zdiff3`, and an
-  `insteadOf` rule rewriting `https://github.com/` → `ssh://git@github.com/`. Verify with
-  `git config --list --show-origin`.
+- **git** (`git/gitconfig`): `pull.ff = only`, `core.ignorecase = false`,
+  `merge.conflictStyle = zdiff3`, and an `insteadOf` rule rewriting `https://github.com/` →
+  `ssh://git@github.com/`. Verify with `git config --list --show-origin`, which shows which file
+  each value came from — useful for telling managed settings from shim scribbles.
 - **`git/.gitignore_global`** carries ML-experiment ignores (`/experiments`, `/runs`,
   `/docs/experiments/status.json`, `/tmp`) plus `.claude/settings.local.json`. These are deliberate:
   they keep experiment artifacts out of every work repo without per-repo `.gitignore` edits.
